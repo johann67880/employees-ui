@@ -28,11 +28,6 @@ export class EmployeeComponent extends UnsubscribeComponent implements OnInit, A
   }
 
   ngOnInit(): void {
-    //ANOTHER WAY: filter data by custom column
-    // this.dataSource.filterPredicate = function(data, filter: string): boolean {
-    //   return data.id.toString() === filter;
-    // };
-
     this.getEmployees();
   }
 
@@ -47,8 +42,9 @@ export class EmployeeComponent extends UnsubscribeComponent implements OnInit, A
 
     this.employeeService.get().subscribe(employees => {
       this.dataSource = new MatTableDataSource<Employee>(employees);
+      this.dataSource.sort = this.sort;
+      this.dataSource.paginator = this.paginator;
       this.loading = false;
-      this.changeDetectorRefs.detectChanges();
     });
   }
 
@@ -59,8 +55,9 @@ export class EmployeeComponent extends UnsubscribeComponent implements OnInit, A
     this.employeeService.getById(id).subscribe(employee => {
       let emp = employee ? [employee] : [];
       this.dataSource = new MatTableDataSource<Employee>(emp);
+      this.dataSource.sort = this.sort;
+      this.dataSource.paginator = this.paginator;
       this.loading = false;
-      this.changeDetectorRefs.detectChanges();
     });
   }
 
@@ -71,11 +68,9 @@ export class EmployeeComponent extends UnsubscribeComponent implements OnInit, A
 
   //filter data by the specific criteria typed by user
   applyFilter(event: Event): void {
-    this.loading = true;
-
-    //Uncomment to see native filtering of angular table
-    //const filterValue = (event.target as HTMLInputElement).value;
-    //this.dataSource.filter = filterValue.trim().toLowerCase();
+    if (this.dataSource.paginator) {
+      this.dataSource.paginator.firstPage();
+    }
 
     if(!this.filter) {
       this.getEmployees();
@@ -83,11 +78,5 @@ export class EmployeeComponent extends UnsubscribeComponent implements OnInit, A
     }
 
     this.getEmployeeById(this.filter);
-
-    if (this.dataSource.paginator) {
-      this.dataSource.paginator.firstPage();
-    }
-
-    this.loading = false;
   }
 }
